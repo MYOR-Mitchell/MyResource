@@ -1,0 +1,31 @@
+﻿.wordsearch-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    padding: 2em;
+}
+
+    .wordsearch-wrapper section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: .5em;
+        padding: 2em;
+        background: var(--section-clr);
+        width: 60%;
+        margin: 0 auto;
+    }
+
+    .wordsearch-wrapper > section:last-of-type {
+        background: none;
+        width: 100%;
+    }
+
+main h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 1em;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--accent-clr);
+}

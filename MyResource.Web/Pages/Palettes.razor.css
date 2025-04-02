@@ -1,0 +1,86 @@
+﻿.palettes-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    padding: 2em;
+}
+
+main {
+    display: inline-flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 0 auto;
+    border-radius: .5em;
+    flex-grow: 1;
+}
+
+    main .color-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .8em;
+        margin: 0 auto;
+    }
+
+    main .color {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        padding-right: 5em;
+    }
+
+        main .color p {
+            margin-right: .5em;
+        }
+
+    main input {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+    }
+
+        main input[type="color"] {
+            cursor: pointer;
+            margin-right: .5em;
+        }
+
+        main input[type="text"] {
+            background: var(--section-clr);
+            color: var(--text-clr);
+            border: 1px solid var(--line-clr);
+            border-radius: .3em;
+            padding-left: .5em;
+        }
+
+    main .buttons {
+        margin-top: 2em;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3em;
+    }
+
+        main .buttons ul {
+            display: flex;
+            list-style: none;
+        }
+
+        main .buttons li button {
+            all: unset;
+            background: var(--base-clr);
+            border: 1px solid var(--line-clr);
+            border-radius: .5em;
+            margin: 0 .5em;
+            width: 8em;
+            padding: 1em 0;
+            cursor: pointer;
+        }
+
+            main .buttons li button:hover {
+                background: var(--hover-clr);
+                box-shadow: 0 0 .2em var(--shadow-clr);
+                transform: scale(1.1);
+                text-decoration: underline;
+                text-decoration-thickness: .2em;
+                text-decoration-color: var(--accent-clr);
+            }

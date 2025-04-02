@@ -1,0 +1,178 @@
+﻿@page "/palettes"
+@inject IJSRuntime JS
+@inject PaletteService PaletteService
+@using MyResource.Services.Palettes
+@using MyResource.Shared.DTOs.Palettes
+
+<main>
+    <header>
+        <h1>Palettes</h1>
+        <p>"Find or create page color palettes"</p>
+    </header>
+
+    <div class="palettes-wrapper">
+        <div class="color-container">
+            <div class="color">
+                <p>Base</p>
+                <input type="color" value="#1e1e1e">
+                <input type="text" value="#1e1e1e" color-var="--base-clr" id="base">
+            </div>
+            <div class="color">
+                <p>Section</p>
+                <input type="color" value="#2a2a2a">
+                <input type="text" value="#2a2a2a" color-var="--section-clr" id="section">
+            </div>
+            <div class="color">
+                <p>Text</p>
+                <input type="color" value="#ffffff">
+                <input type="text" value="#ffffff" color-var="--text-clr" id="text">
+            </div>
+            <div class="color">
+                <p>Secondary Text</p>
+                <input type="color" value="#b0b0b0">
+                <input type="text" value="#b0b0b0" color-var="--secondary-text-clr" id="secondaryText">
+            </div>
+            <div class="color">
+                <p>Accent</p>
+                <input type="color" value="#4aa3df">
+                <input type="text" value="#4aa3df" color-var="--accent-clr" id="accent">
+            </div>
+            <div class="color">
+                <p>Line</p>
+                <input type="color" value="#474747">
+                <input type="text" value="#474747" color-var="--line-clr" id="line">
+            </div>
+            <div class="color">
+                <p>Hover</p>
+                <input type="color" value="#333333">
+                <input type="text" value="#333333" color-var="--hover-clr" id="hover">
+            </div>
+            <div class="color">
+                <p>Shadow</p>
+                <input type="color" value="#d0d0d0">
+                <input type="text" value="#d0d0d0" color-var="--shadow-clr" id="shadow">
+            </div>
+        </div>
+
+        <div class="buttons">
+            <ul>
+                <li><button @onclick="GeneratePalette">Generate</button></li>
+                <li><button @onclick="LoadRandomPalette">Random</button></li>
+                <li><button @onclick="ResetPalette">Reset</button></li>
+                <li><button @onclick="CopyPalette">Copy</button></li>
+            </ul>
+            <ul>
+                <li><button @onclick="SavePalette">Save</button></li>
+                <li><button @onclick="DeletePalette">Delete</button></li>
+            </ul>
+        </div>
+        <div class="indicator">
+            <p>@(currentPaletteId is null ? "-" : currentPaletteId)</p>
+        </div>
+    </div>
+</main>
+
+<footer></footer>
+
+@code {
+    private int? currentPaletteId = null;
+
+    private record ColorField(string Id, string Label, string Var, string Default);
+
+    private List<ColorField> colorIds = new()
+            {
+        new("base", "Base", "--base-clr", "#1e1e1e"),
+        new("section", "Section", "--section-clr", "#2a2a2a"),
+        new("text", "Text", "--text-clr", "#ffffff"),
+        new("secondaryText", "Secondary Text", "--secondary-text-clr", "#b0b0b0"),
+        new("accent", "Accent", "--accent-clr", "#4aa3df"),
+        new("line", "Line", "--line-clr", "#474747"),
+        new("hover", "Hover", "--hover-clr", "#333333"),
+        new("shadow", "Shadow", "--shadow-clr", "#d0d0d0")
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await JS.InvokeVoidAsync("initPalettePage");
+        }
+    }
+
+    private async Task SavePalette()
+    {
+        var dto = new PaletteDto {
+                UserId = null,
+                BaseClr = await JS.InvokeAsync<string>("getColorValue", "base"),
+                SectionClr = await JS.InvokeAsync<string>("getColorValue", "section"),
+                TextClr = await JS.InvokeAsync<string>("getColorValue", "text"),
+                SecondaryTextClr = await JS.InvokeAsync<string>("getColorValue", "secondaryText"),
+                AccentClr = await JS.InvokeAsync<string>("getColorValue", "accent"),
+                LineClr = await JS.InvokeAsync<string>("getColorValue", "line"),
+                HoverClr = await JS.InvokeAsync<string>("getColorValue", "hover"),
+                ShadowClr = await JS.InvokeAsync<string>("getColorValue", "shadow")
+            };
+
+        var success = await PaletteService.SavePalette(dto);
+        await JS.InvokeVoidAsync("alert", success ? "Palette saved!" : "Save failed.");
+    }
+
+    private async Task DeletePalette()
+    {
+        if(currentPaletteId is null)
+        {
+            await JS.InvokeVoidAsync("alert", "No palette loaded.");
+            return;
+        }
+
+        var confirm = await JS.InvokeAsync<bool>("confirm", "Delete this palette?");
+        if(!confirm)
+            return;
+
+        var success = await PaletteService.DeletePalette(currentPaletteId.Value);
+        await JS.InvokeVoidAsync("alert", success ? "Palette deleted." : "Delete failed.");
+        if(success)
+        {
+            currentPaletteId = null;
+        }
+    }
+
+    private async Task LoadRandomPalette()
+    {
+        var palette = await PaletteService.GetRandomPalette();
+        if(palette == null)
+        {
+            await JS.InvokeVoidAsync("alert", "No palettes found.");
+            return;
+        }
+
+        currentPaletteId = palette.PaletteId;
+
+        await JS.InvokeVoidAsync("setColorValue", "base", palette.BaseClr);
+        await JS.InvokeVoidAsync("setColorValue", "section", palette.SectionClr);
+        await JS.InvokeVoidAsync("setColorValue", "text", palette.TextClr);
+        await JS.InvokeVoidAsync("setColorValue", "secondaryText", palette.SecondaryTextClr);
+        await JS.InvokeVoidAsync("setColorValue", "accent", palette.AccentClr);
+        await JS.InvokeVoidAsync("setColorValue", "line", palette.LineClr);
+        await JS.InvokeVoidAsync("setColorValue", "hover", palette.HoverClr);
+        await JS.InvokeVoidAsync("setColorValue", "shadow", palette.ShadowClr);
+
+        await JS.InvokeVoidAsync("applyPalette");
+    }
+
+    private async Task ResetPalette()
+    {
+        await JS.InvokeVoidAsync("resetPalette");
+        currentPaletteId = null;
+    }
+
+    private async Task CopyPalette()
+    {
+        await JS.InvokeVoidAsync("copyPalette");
+    }
+
+    private async Task GeneratePalette()
+    {
+        await JS.InvokeVoidAsync("generatePalette");
+    }
+}

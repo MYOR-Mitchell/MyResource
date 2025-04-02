@@ -1,0 +1,155 @@
+﻿@page "/thoughts"
+@inject ThoughtService ThoughtService
+@using MyResource.Services.ThoughtCatcher
+@using MyResource.Shared.DTOs.ThoughtCatcher
+
+<main>
+    <header>
+        <h1>ThoughtCatcher</h1>
+        <p>"...I'll still forget.'"</p>
+    </header>
+
+    <div class="thoughtcatcher-wrapper">
+        <section>
+            <h2>Submit a Thought</h2>
+            <input @bind="newThought.Title" placeholder="Title." />
+            <textarea @bind="newThought.Body" placeholder="The thought?"></textarea>
+            <button @onclick="SubmitThought">Submit</button>
+            <p>@resultMessage</p>
+        </section>
+
+        <section>
+            <h2>Thoughts</h2>
+            @if(thoughts.Count == 0)
+            {
+                <p>No thoughts yet.</p>
+            }
+            else
+            {
+                @foreach(var t in thoughts)
+                {
+                    <div class="thought-card">
+                        @if(editingId == t.ThoughtId)
+                        {
+                            <div class="edit-form">
+                                <input @bind="editedTitle" placeholder="Title" />
+                                <textarea @bind="editedBody" placeholder="The thought?" />
+                                <div class="button-group">
+                                    <button @onclick="() => SaveEdit(t.ThoughtId)">Save</button>
+                                    <button @onclick="CancelEdit">Cancel</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <h3 class="thought-title">@t.Title</h3>
+                            <p class="thought-body">@t.Body</p>
+                            <div class="button-group">
+                                <button @onclick="() => StartEditing(t)">Edit</button>
+                                <button @onclick="() => DeleteThought(t.ThoughtId)">Delete</button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </section>
+    </div>
+</main>
+
+<footer></footer>
+
+@code {
+    private List<ThoughtResponseDto> thoughts = new();
+    private ThoughtDto newThought = new() { UserId = 1 };
+    private string resultMessage = "";
+    private int? editingId = null;
+    private string editedTitle = "";
+    private string editedBody = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        thoughts = await ThoughtService.GetThoughts();
+    }
+
+    private async Task SubmitThought()
+    {
+        var result = await ThoughtService.AddThought(newThought);
+
+        if(result != null)
+        {
+            thoughts.Insert(0, result); 
+            resultMessage = "Thought posted.";
+            newThought = new() { UserId = 1 };
+
+            _ = Task.Run(async () => {
+                await Task.Delay(5000);
+                resultMessage = "";
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+        else
+        {
+            resultMessage = "Something went wrong.";
+        }
+    }
+
+    private void StartEditing(ThoughtResponseDto t)
+    {
+        editingId = t.ThoughtId;
+        editedTitle = t.Title;
+        editedBody = t.Body;
+    }
+
+    private void CancelEdit()
+    {
+        editingId = null;
+    }
+
+    private async Task SaveEdit(int id)
+    {
+        var updated = new ThoughtDto {
+                Title = editedTitle,
+                Body = editedBody,
+                UserId = 1
+            };
+
+        var result = await ThoughtService.UpdateThought(id, updated);
+
+        if(result != null)
+        {
+            var index = thoughts.FindIndex(t => t.ThoughtId == id);
+            if(index != -1)
+            {
+                thoughts[index] = result;
+            }
+
+            editedTitle = "";
+            editedBody = "";
+            editingId = null;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            resultMessage = "Update failed.";
+        }
+    }
+
+
+    private async Task DeleteThought(int id)
+    {
+        var success = await ThoughtService.DeleteThought(id);
+        if(success)
+        {
+            var toRemove = thoughts.FirstOrDefault(t => t.ThoughtId == id);
+            if(toRemove != null)
+            {
+                thoughts.Remove(toRemove);
+            }
+        }
+        else
+        {
+            resultMessage = "Failed to delete.";
+        }
+    }
+}

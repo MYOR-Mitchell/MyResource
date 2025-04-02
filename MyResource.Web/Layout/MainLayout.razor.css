@@ -1,0 +1,64 @@
+﻿.layout {
+    display: flex;
+}
+
+.layout-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Aside content */
+aside {
+    position: sticky;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    border-right: 1px solid var(--line-clr);
+}
+
+    aside .aside-logo {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+        padding: 1.5em;
+        border-bottom: 1px solid var(--line-clr);
+    }
+
+        aside .aside-logo img {
+            width: 2.5em;
+            border-radius: 50%;
+        }
+
+        aside .aside-logo h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-top: auto;
+        }
+
+::deep nav ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-top: 1em;
+}
+
+::deep nav li a {
+    display: flex;
+    font-size: 1.1rem;
+    background: inherit;
+    cursor: pointer;
+    border: none;
+    color: var(--text-clr);
+    padding: .5em 2em;
+    text-decoration: none;
+    width: 100%;
+    line-height: inherit;
+}
+
+    ::deep nav li a:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+        text-decoration-color: var(--accent-clr);
+        background: var(--hover-clr);
+    }
