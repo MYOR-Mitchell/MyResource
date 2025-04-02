@@ -1,0 +1,6 @@
+@MyResource.API_HostAddress = http://localhost:5125
+
+GET {{MyResource.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

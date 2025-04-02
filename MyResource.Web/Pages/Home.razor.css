@@ -1,0 +1,22 @@
+﻿.home-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    padding: 2em;
+}
+
+    .home-wrapper section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: .5em;
+        padding: 2em;
+        background: var(--section-clr);
+        width: 60%;
+        margin: 0 auto;
+    }
+
+    .home-wrapper > section:last-of-type {
+        background: none;
+        width: 100%;
+    }
