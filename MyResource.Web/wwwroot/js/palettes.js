@@ -1,5 +1,4 @@
 ﻿function initPalettePage() {
-    fetch("https://palettegeneratorapi.onrender.com/api/palette/generate");
 
     let myList = [
         "--base-clr: ",
