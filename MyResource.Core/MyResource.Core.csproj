@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Palettes\Logic\" />
-    <Folder Include="WordSearch\Models\" />
-    <Folder Include="WordSearch\Interfaces\" />
   </ItemGroup>
 
 </Project>
