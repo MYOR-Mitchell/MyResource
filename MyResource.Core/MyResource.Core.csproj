@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Features\WordSearch\Models\" />
-    <Folder Include="Features\WordSearch\Interfaces\" />
-    <Folder Include="Features\WordSearch\Services\" />
+    <Folder Include="Palettes\Logic\" />
+    <Folder Include="WordSearch\Models\" />
+    <Folder Include="WordSearch\Interfaces\" />
   </ItemGroup>
 
 </Project>

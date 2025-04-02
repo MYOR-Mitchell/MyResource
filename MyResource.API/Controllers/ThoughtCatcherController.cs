@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyResource.Data;
 using MyResource.Shared.DTOs.ThoughtCatcher;
-using MyResource.Core.Features.ThoughtCatcher.Models;
+using MyResource.Core.ThoughtCatcher.Models;
 
 namespace MyResource.API.Controllers
 {
@@ -51,7 +52,7 @@ namespace MyResource.API.Controllers
             thought.UserId = dto.UserId;
 
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(thought);
         }
 
         [HttpGet]

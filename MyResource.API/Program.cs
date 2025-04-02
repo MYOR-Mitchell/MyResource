@@ -1,6 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using MyResource.Core.Palettes.Interfaces;
+using MyResource.Data;
+using MyResource.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IPaletteRepository, PaletteRepository>();
 
 builder.Services.AddDbContext<MyResourceContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

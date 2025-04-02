@@ -3,6 +3,7 @@ namespace MyResource.Shared.DTOs.Palettes
 {
     public class PaletteDto
     {
+        public int PaletteId { get; set; }
         public int? UserId { get; set; }
         public string BaseClr { get; set; }
         public string SectionClr { get; set; }

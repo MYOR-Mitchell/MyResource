@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MyResource.Core\MyResource.Core.csproj" />
     <ProjectReference Include="..\MyResource.Data\MyResource.Data.csproj" />
+    <ProjectReference Include="..\MyResource.Services\MyResource.Services.csproj" />
     <ProjectReference Include="..\MyResource.Shared\MyResource.Shared.csproj" />
   </ItemGroup>
 

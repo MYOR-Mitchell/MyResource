@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyResource.Core.Features.ThoughtCatcher.Models;
-using MyResource.Core.Features.Palettes.Models;
+using MyResource.Core.Palettes.Models;
+using MyResource.Core.ThoughtCatcher.Models;
 
+namespace MyResource.Data;
 public class MyResourceContext : DbContext
 {
     public MyResourceContext(DbContextOptions<MyResourceContext> options)

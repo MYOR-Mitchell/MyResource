@@ -1,78 +1,73 @@
-﻿function initPalettePage() {
+﻿window.currentPaletteId = null;
 
-    let myList = [
-        "--base-clr: ",
-        "--section-clr: ",
-        "--text-clr: ",
-        "--secondary-text-clr: ",
-        "--accent-clr: ",
-        "--line-clr: ",
-        "--hover-clr: ",
-        "--shadow-clr: "];
-
-    document.getElementById("copyBtn").addEventListener("click", function () {
-        const colorInputs = document.querySelectorAll("input[type='text']");
-
-        let cssText = "";
-        let i = 0;
-        colorInputs.forEach(input => {
-            let hexColor = input.value;
-            cssText += myList[i] + "" + hexColor + ";\n";
-            i++;
+window.initPalettePage = function () {
+    const colorInputs = document.querySelectorAll(".color input[type='color']");
+    colorInputs.forEach(input => {
+        input.addEventListener("input", () => {
+            const textInput = input.nextElementSibling;
+            textInput.value = input.value;
+            applyPalette();
         });
-
-        navigator.clipboard.writeText(cssText)
-        alert("Copied to clipboard");
     });
 
-    function applyPalette() {
-        const colorInputs = document.querySelectorAll("input[type='text']");
-
-        colorInputs.forEach(input => {
-            let colorVarUpdate = input.getAttribute("color-var");
-            let colorValue = input.value;
-            document.documentElement.style.setProperty(colorVarUpdate, colorValue);
+    const textInputs = document.querySelectorAll(".color input[type='text']");
+    textInputs.forEach(input => {
+        input.addEventListener("input", () => {
+            const colorInput = input.previousElementSibling;
+            colorInput.value = input.value;
+            applyPalette();
         });
+    });
+
+    const copyBtn = document.getElementById("copyBtn");
+    if (copyBtn) copyBtn.addEventListener("click", copyPalette);
+
+    applyPalette();
+};
+
+window.resetPalette = function () {
+    const defaults = {
+        base: "#1e1e1e",
+        section: "#2a2a2a",
+        text: "#ffffff",
+        secondaryText: "#b0b0b0",
+        accent: "#4aa3df",
+        line: "#474747",
+        hover: "#333333",
+        shadow: "#d0d0d0"
+    };
+
+    for (const [id, value] of Object.entries(defaults)) {
+        window.setColorValue(id, value);
     }
 
-    document.getElementById("generateBtn").addEventListener("click", applyPalette);
+    applyPalette();
+};
 
-    document.querySelectorAll("input[type='color']").forEach(colorInput => {
-        colorInput.addEventListener("input", function () {
-            this.nextElementSibling.value = this.value;
-        });
+function applyPalette() {
+    const inputs = document.querySelectorAll(".color input[type='text']");
+    inputs.forEach(input => {
+        const cssVar = input.getAttribute("color-var");
+        document.documentElement.style.setProperty(cssVar, input.value);
     });
-
-    document.querySelectorAll("input[type='text']").forEach(colorInput => {
-        colorInput.addEventListener("input", function () {
-            this.previousElementSibling.value = this.value;
-        });
-    });
-
-
-    document.getElementById("randomBtn").addEventListener("click", function () {
-        fetch("https://palettegeneratorapi.onrender.com/api/palette/generate")
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("base").value = data.baseClr;
-                document.getElementById("section").value = data.sectionClr;
-                document.getElementById("text").value = data.textClr;
-                document.getElementById("secondaryText").value = data.secondaryTextClr;
-                document.getElementById("accent").value = data.accentClr;
-                document.getElementById("line").value = data.lineClr;
-                document.getElementById("hover").value = data.hoverClr;
-                document.getElementById("shadow").value = data.shadowClr;
-
-                document.getElementById("base").previousElementSibling.value = data.baseClr;
-                document.getElementById("section").previousElementSibling.value = data.sectionClr;
-                document.getElementById("text").previousElementSibling.value = data.textClr;
-                document.getElementById("secondaryText").previousElementSibling.value = data.secondaryTextClr;
-                document.getElementById("accent").previousElementSibling.value = data.accentClr;
-                document.getElementById("line").previousElementSibling.value = data.lineClr;
-                document.getElementById("hover").previousElementSibling.value = data.hoverClr;
-                document.getElementById("shadow").previousElementSibling.value = data.shadowClr;
-            })
-            .then(() => applyPalette())
-    });
-
 }
+
+function copyPalette() {
+    const inputs = document.querySelectorAll(".color input[type='text']");
+    const colors = Array.from(inputs).map(input => input.value).join(", ");
+    navigator.clipboard.writeText(colors);
+    alert("Copied: " + colors);
+}
+
+window.getColorValue = function (id) {
+    return document.getElementById(id)?.value ?? "";
+};
+
+window.setColorValue = function (id, value) {
+    const input = document.getElementById(id);
+    if (input) {
+        input.value = value;
+        const textInput = input.type === "color" ? input.nextElementSibling : input.previousElementSibling;
+        if (textInput) textInput.value = value;
+    }
+};

@@ -1,5 +1,4 @@
-﻿
-namespace MyResource.Core.Features.Palettes.Models
+﻿namespace MyResource.Core.Palettes.Models
 {
     public class Palette
     {

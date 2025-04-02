@@ -1,4 +1,4 @@
-﻿namespace MyResource.Core.Features.ThoughtCatcher.Models
+﻿namespace MyResource.Core.ThoughtCatcher.Models
 {
     public class Thought
     {

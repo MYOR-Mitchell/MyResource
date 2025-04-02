@@ -1,6 +1,7 @@
 ﻿@page "/palettes"
 @inject IJSRuntime JS
-@inject HttpClient Http
+@inject PaletteService PaletteService
+@using MyResource.Services.Palettes
 @using MyResource.Shared.DTOs.Palettes
 
 <main>
@@ -55,27 +56,18 @@
 
         <div class="buttons">
             <ul>
-                <li>
-                    <button id="generateBtn">Generate</button>
-                </li>
-                <li>
-                    <button id="randomBtn">Random</button>
-                </li>
-                <li>
-                    <button onclick="javascript:void(0); location.reload();">Reset</button>
-                </li>
-                <li>
-                    <button id="copyBtn">Copy</button>
-                </li>
+                <li><button @onclick="GeneratePalette">Generate</button></li>
+                <li><button @onclick="LoadRandomPalette">Random</button></li>
+                <li><button @onclick="ResetPalette">Reset</button></li>
+                <li><button @onclick="CopyPalette">Copy</button></li>
             </ul>
             <ul>
-                <li>
-                    <button id="saveBtn">Save</button>
-                </li>
-                <li>
-                    <button id="deleteBtn">Delete</button>
-                </li>
+                <li><button @onclick="SavePalette">Save</button></li>
+                <li><button @onclick="DeletePalette">Delete</button></li>
             </ul>
+        </div>
+        <div class="indicator">
+            <p>@(currentPaletteId is null ? "-" : currentPaletteId)</p>
         </div>
     </div>
 </main>
@@ -83,36 +75,21 @@
 <footer></footer>
 
 @code {
-    private async Task SubmitPalette()
-    {
-        var palette = new PaletteDto {
-                UserId = null,
-                BaseClr = await GetValue("base"),
-                SectionClr = await GetValue("section"),
-                TextClr = await GetValue("text"),
-                SecondaryTextClr = await GetValue("secondaryText"),
-                AccentClr = await GetValue("accent"),
-                LineClr = await GetValue("line"),
-                HoverClr = await GetValue("hover"),
-                ShadowClr = await GetValue("shadow")
-            };
+    private int? currentPaletteId = null;
 
-        var response = await Http.PostAsJsonAsync("https://localhost:7049/api/palettes", palette);
+    private record ColorField(string Id, string Label, string Var, string Default);
 
-        if(response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("Palette saved!");
-        }
-        else
-        {
-            Console.WriteLine("Save failed.");
-        }
-    }
-
-    private async Task<string> GetValue(string id)
-    {
-        return await JS.InvokeAsync<string>("eval", $"document.getElementById('{id}').value");
-    }
+    private List<ColorField> colorIds = new()
+            {
+        new("base", "Base", "--base-clr", "#1e1e1e"),
+        new("section", "Section", "--section-clr", "#2a2a2a"),
+        new("text", "Text", "--text-clr", "#ffffff"),
+        new("secondaryText", "Secondary Text", "--secondary-text-clr", "#b0b0b0"),
+        new("accent", "Accent", "--accent-clr", "#4aa3df"),
+        new("line", "Line", "--line-clr", "#474747"),
+        new("hover", "Hover", "--hover-clr", "#333333"),
+        new("shadow", "Shadow", "--shadow-clr", "#d0d0d0")
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -120,5 +97,82 @@
         {
             await JS.InvokeVoidAsync("initPalettePage");
         }
+    }
+
+    private async Task SavePalette()
+    {
+        var dto = new PaletteDto {
+                UserId = null,
+                BaseClr = await JS.InvokeAsync<string>("getColorValue", "base"),
+                SectionClr = await JS.InvokeAsync<string>("getColorValue", "section"),
+                TextClr = await JS.InvokeAsync<string>("getColorValue", "text"),
+                SecondaryTextClr = await JS.InvokeAsync<string>("getColorValue", "secondaryText"),
+                AccentClr = await JS.InvokeAsync<string>("getColorValue", "accent"),
+                LineClr = await JS.InvokeAsync<string>("getColorValue", "line"),
+                HoverClr = await JS.InvokeAsync<string>("getColorValue", "hover"),
+                ShadowClr = await JS.InvokeAsync<string>("getColorValue", "shadow")
+            };
+
+        var success = await PaletteService.SavePalette(dto);
+        await JS.InvokeVoidAsync("alert", success ? "Palette saved!" : "Save failed.");
+    }
+
+    private async Task DeletePalette()
+    {
+        if(currentPaletteId is null)
+        {
+            await JS.InvokeVoidAsync("alert", "No palette loaded.");
+            return;
+        }
+
+        var confirm = await JS.InvokeAsync<bool>("confirm", "Delete this palette?");
+        if(!confirm)
+            return;
+
+        var success = await PaletteService.DeletePalette(currentPaletteId.Value);
+        await JS.InvokeVoidAsync("alert", success ? "Palette deleted." : "Delete failed.");
+        if(success)
+        {
+            currentPaletteId = null;
+        }
+    }
+
+    private async Task LoadRandomPalette()
+    {
+        var palette = await PaletteService.GetRandomPalette();
+        if(palette == null)
+        {
+            await JS.InvokeVoidAsync("alert", "No palettes found.");
+            return;
+        }
+
+        currentPaletteId = palette.PaletteId;
+
+        await JS.InvokeVoidAsync("setColorValue", "base", palette.BaseClr);
+        await JS.InvokeVoidAsync("setColorValue", "section", palette.SectionClr);
+        await JS.InvokeVoidAsync("setColorValue", "text", palette.TextClr);
+        await JS.InvokeVoidAsync("setColorValue", "secondaryText", palette.SecondaryTextClr);
+        await JS.InvokeVoidAsync("setColorValue", "accent", palette.AccentClr);
+        await JS.InvokeVoidAsync("setColorValue", "line", palette.LineClr);
+        await JS.InvokeVoidAsync("setColorValue", "hover", palette.HoverClr);
+        await JS.InvokeVoidAsync("setColorValue", "shadow", palette.ShadowClr);
+
+        await JS.InvokeVoidAsync("applyPalette");
+    }
+
+    private async Task ResetPalette()
+    {
+        await JS.InvokeVoidAsync("resetPalette");
+        currentPaletteId = null;
+    }
+
+    private async Task CopyPalette()
+    {
+        await JS.InvokeVoidAsync("copyPalette");
+    }
+
+    private async Task GeneratePalette()
+    {
+        await JS.InvokeVoidAsync("generatePalette");
     }
 }

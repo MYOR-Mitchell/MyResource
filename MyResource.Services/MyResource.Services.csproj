@@ -10,8 +10,4 @@
     <ProjectReference Include="..\MyResource.Shared\MyResource.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Palettes\" />
-  </ItemGroup>
-
 </Project>
