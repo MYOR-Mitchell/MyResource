@@ -1,4 +1,4 @@
-# 🧰 MyResource
+# MyResource 🧰
 
 A monolith still in development.   
 
